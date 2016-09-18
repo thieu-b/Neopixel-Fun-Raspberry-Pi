@@ -29,7 +29,7 @@
 */
 
 /*
- * thieu b <thieu3900@gmail.com>
+ * thieu b 
 */
 
 // PROGRAMMA ALTIJD STOPPEN MET CTRL-C ANDERS PROBLEMEN MET pigpio
@@ -1743,6 +1743,7 @@ void stringCopy(char doel[], char bron[], int aantal)					// Copy functie van st
 void omhoog7()															// Zet de tekst eerst in het middenen schuift dan omhoog
 {																		// aantal pixels mag meer zijn dan aantal leds
 	stringCopy(pixelBuf1, pixelBuf2, aantalPixels);						// bij einde int volgendeStap = 1
+	stringCopy(pixelBuf2, pixelBuf3, aantalPixels);
 	stringCopy(pixelBuf3, pixelBuf4, aantalPixels);
 	stringCopy(pixelBuf4, pixelBuf5, aantalPixels);
 	stringCopy(pixelBuf5, pixelBuf6, aantalPixels);
