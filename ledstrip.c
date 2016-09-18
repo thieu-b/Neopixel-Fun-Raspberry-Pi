@@ -29,7 +29,7 @@
 */
 
 /*
- * thieu b 
+ * thieu b <thieu3900@gmail.com>
 */
 
 // PROGRAMMA ALTIJD STOPPEN MET CTRL-C ANDERS PROBLEMEN MET pigpio
