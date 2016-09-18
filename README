@@ -1,0 +1,53 @@
+Hoe werkt het?
+
+De opbouw is gebaseerd op een DMA overdracht maar dan met extern serieel geheugen. 
+Een "1" bit voor de WS2812B moet eerst een HOOG signaal hebben van 900nSec gevolgd door een LAAG signaal van 350nSec.
+Een "0" bit voor de WS2812B moet eerst een HOOG signaal hebben van 350nSec gevolgd door een LAAG signaal van 900nSec.
+En dit met een foutmarge van +/- 150nSec
+Elke databit voor de Leds wordt door Pi omgezet naar een timing nibble of halve byte. Voor elke databyte hebben
+we dus uiteindelijk 4 timingbytes nodig.
+Voor een databit met waarde "1" wordt dit omgezet naar 1110 of 0xE
+Voor een databit met waarde "0" wordt dit omgezet naar 1000 of 0x8
+Het omzetten van deze bits wordt gedaan met behulp van de lookup tabellen
+
+byteHoog
+byteMiddenHoog
+byteMiddenLaag
+ByteLaag
+en de functies
+void strip2Buffer8()
+void strip(char buffer[], char red[], char green[], char blue[])
+
+na het omzetten wordt deze data via SPI communicatie in de RAM's geschreven.
+Het uitlezen naar de leds gebeurt echter onder controle van een externe oscillator welk een frequentie heeft van 3.2Mhz.
+Dit wil dus zeggen dat een clockcyclus van deze oscillator 1/3.2 = 312.5nSec
+De "1" timing nibble - 1110 - geeft op de uitgang van de RAM een signaal van  						
+3 * 312.5nSec = 937.5nSec HOOG
+1 * 312.5nSec = 312.5nSec LAAG
+
+De "0" timing nibble - 1000 - geeft op de uitgang van de RAM een signaal van
+1 * 312.5nSec = 312.5nSec HOOG
+3 * 312.5nSec = 937.5nSec LAAG
+
+Deze timing valt binnen de marge welke voor de WS2812B is toegelaten.
+De data voor de ledstrips wordt in RAM1 tot en met RAM8 geschreven.
+Omdat de PI niet kan weten wanneer de data overdracht naar de leds beeindigd is, wordt dit overgenomen door de 74HC74.
+In RAM0 wordt voor over de lengte ((aantal Leds * 12) + 1)bytes allemaal "0x00" geschreven. De daaropvolgende byte die naar RAM0
+geschreven wordt is 0xFF.
+De uitgang van RAM0 gaat naar de de 74HC74 zodat na het doorsturen van alle data naar de leds er op de Clock ingang
+van de 74HC74 een "1" komt. Deze stuurt zo de Q uitgang naar "1" welke op zijn beurt de 74HCT245 naar de leds dicht 
+stuurt.
+Dit signaal gaat ook nar GPIO12 van PI zodat deze ook weet dat de data overdracht voorbij is.
+
+Waarom aantal Leds * 12. Elke led op de strip heeft 3 data bytes. 1 byte voor groen, 1 byte voor rood en 1 byte voor blauw.
+Omdat we bij het omzetten van databytes naar timingbytes we voor elke byte 4 bytes nodig hebben wordt het dus
+aantal leds * 3 * 4.
+Waarom die + 1. Om alles correct te laten verlopen moet de 1ste byte welke naar de leds gestuurd wordt een "0x00" zijn. Deze komt
+er dus extra bij; Waarom? Ik heb er absoluut geen idee van maar het werkt en meer moet dat niet zijn.
+
+groeten
+thieu b
+ 
+thieu3900@gmail.com
+
+
